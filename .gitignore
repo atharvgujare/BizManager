@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# .NET Build Artifacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Frontend Build
+dist/
+dist-ssr/
+*.local
+
+# Mobile & Expo
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Environment & IDE
+.env
+.env.*
+.DS_Store
+Thumbs.db
+*.log
