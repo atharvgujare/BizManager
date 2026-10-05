@@ -8,15 +8,37 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Dynamic Port (Render uses $PORT, defaults to 5058 for local dev)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5058";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 // 1. Add Controllers
 builder.Services.AddControllers();
 
-// 2. Database Context (SQL Server / MSSQLLocalDB)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=(localdb)\\mssqllocaldb;Database=BusinessManagerDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;";
+// 2. Database Context (SQLite for cross-platform/Docker/Render cloud, SQL Server if configured)
+var rawConn = builder.Configuration.GetConnectionString("DefaultConnection") 
+              ?? Environment.GetEnvironmentVariable("DATABASE_URL")
+              ?? Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+{
+    if (!string.IsNullOrEmpty(rawConn) && !rawConn.Contains("(localdb)") && !rawConn.EndsWith(".db"))
+    {
+        // External SQL Server instance configured via env variable or connection string
+        options.UseSqlServer(rawConn);
+    }
+    else if (OperatingSystem.IsWindows() && string.IsNullOrEmpty(rawConn))
+    {
+        // Windows local development with LocalDB
+        options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=BusinessManagerDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;");
+    }
+    else
+    {
+        // Cross-platform Docker / Render deployment: zero-config fast embedded SQLite
+        var dbPath = Path.Combine(builder.Environment.ContentRootPath, "businessmanager.db");
+        options.UseSqlite($"Data Source={dbPath}");
+    }
+});
 
 // 3. Register Application Services
 builder.Services.AddScoped<ITokenService, TokenService>();
