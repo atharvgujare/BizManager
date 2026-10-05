@@ -8,9 +8,14 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dynamic Port (Render uses $PORT, defaults to 5058 for local dev)
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5058";
-builder.WebHost.UseUrls($"http://*:{port}");
+// Dynamic Port support: bind to 5058, 10000, and Render dynamic $PORT
+var port = Environment.GetEnvironmentVariable("PORT");
+var listenUrls = new List<string> { "http://*:5058", "http://*:10000" };
+if (!string.IsNullOrEmpty(port))
+{
+    listenUrls.Add($"http://*:{port}");
+}
+builder.WebHost.UseUrls(string.Join(";", listenUrls.Distinct()));
 
 // 1. Add Controllers
 builder.Services.AddControllers();

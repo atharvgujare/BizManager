@@ -8,6 +8,9 @@ obj/
 *.user
 *.suo
 .vs/
+*.db
+*.db-shm
+*.db-wal
 
 # Frontend Build
 dist/

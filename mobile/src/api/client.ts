@@ -1,8 +1,7 @@
 import { Platform } from 'react-native';
 
-// Wi-Fi network IP of host machine for real physical phone devices
-const SERVER_IP = '192.168.1.17';
-export const API_BASE_URL = `http://${SERVER_IP}:5058/api`;
+// Production Render API (Secure HTTPS - works everywhere with zero cleartext blocks)
+export const API_BASE_URL = 'https://bizmanager-w514.onrender.com/api';
 
 let authToken: string | null = null;
 

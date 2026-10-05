@@ -10,6 +10,7 @@ RUN dotnet publish "BusinessManager.Api.csproj" -c Release -o /app/publish /p:Us
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENV ASPNETCORE_URLS=http://+:5058
+ENV ASPNETCORE_URLS=http://+:5058;http://+:10000
 EXPOSE 5058
+EXPOSE 10000
 ENTRYPOINT ["dotnet", "BusinessManager.Api.dll"]
